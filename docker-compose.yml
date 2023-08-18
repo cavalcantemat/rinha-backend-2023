@@ -1,0 +1,24 @@
+version: '3'
+services:
+  grpc-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    depends_on:
+      - rabbitmq
+    networks:
+      - my-network
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

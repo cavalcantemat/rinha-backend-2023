@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package grpc;
+
+service Person {
+    rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse);
+    rpc GetPerson(GetPersonRequest) returns (GetPersonResponse);
+    rpc SearchPeople(SearchPeopleRequest) returns (SearchPeopleResponse);
+    rpc CountPeople(CountPeopleRequest) returns (CountPeopleResponse);
+}
+
+message CreatePersonRequest {
+    uint32 id = 1;
+    string name = 2;
+}
+
+message CreatePersonResponse {
+    uint32 id = 1;
+    string name = 2;
+}
+
+message GetPersonRequest {
+    uint32 id = 1;
+}
+
+message GetPersonResponse {
+    string name = 1;
+}
+
+message SearchPeopleRequest {
+    string term = 1;
+}
+
+message SearchPeopleResponse {
+    repeated string results = 1;
+}
+
+message CountPeopleRequest {}
+
+message CountPeopleResponse {
+    uint32 count = 1;
+}
