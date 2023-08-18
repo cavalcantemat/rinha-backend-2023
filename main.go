@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	
+
 	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -20,28 +20,31 @@ func asyncUnaryServerInterceptor(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
-	// Implemente a lógica do interceptor aqui
+	// Implement the logic of the interceptor here
 	// ...
+
+	// Call the actual handler to process the request
+	resp, err = handler(ctx, req)
+
+	// Additional logic can be placed here after the handler is called
+	// ...
+
 	return
 }
 
 type personServer struct {
-	// Implemente a estrutura do servidor aqui
-	// ...
+	personCache map[uint32]string
+	rabbitConn  *amqp.Connection
+	rabbitChan  *amqp.Channel
 }
 
-// ... (Implemente definições de serviços e mensagens aqui)
+// Implement service methods here
+// ...
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
-	}
-
-	// Load TLS certificates
-	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
-	if err != nil {
-		log.Fatalf("failed to load TLS certificates: %v", err)
 	}
 
 	rabbitConn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -56,16 +59,9 @@ func main() {
 	}
 	defer rabbitChan.Close()
 
-	q, err := rabbitChan.QueueDeclare(
-		"task_queue",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
+	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
 	if err != nil {
-		log.Fatalf("failed to declare a queue: %v", err)
+		log.Fatalf("failed to load TLS certificates: %v", err)
 	}
 
 	s := grpc.NewServer(
@@ -74,7 +70,7 @@ func main() {
 			asyncUnaryServerInterceptor,
 		)),
 	)
-	
+
 	// ... (Registre seus serviços no servidor gRPC aqui)
 
 	fmt.Println("gRPC server started on :50051")
